@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>生生護動 - 招生說明會成效分析（Airtable 即時版）</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        header {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        header h1 {
+            color: #667eea;
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+
+        header p {
+            color: #666;
+            font-size: 16px;
+        }
+
+        .status {
+            display: inline-block;
+            margin-top: 15px;
+            padding: 8px 15px;
+            background: #e8f5e9;
+            color: #2e7d32;
+            border-radius: 6px;
+            font-size: 13px;
+        }
+
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .kpi-card {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            border-left: 5px solid #667eea;
+            min-height: 120px;
+        }
+
+        .kpi-card.mql {
+            border-left-color: #FF6B6B;
+        }
+
+        .kpi-card.sql {
+            border-left-color: #4ECDC4;
+        }
+
+        .kpi-card.rate {
+            border-left-color: #45B7D1;
+        }
+
+        .kpi-label {
+            color: #999;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+        }
+
+        .kpi-value {
+            font-size: 36px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .kpi-rate {
+            font-size: 14px;
+            color: #667eea;
+        }
+
+        .loading {
+            text-align: center;
+            color: #999;
+            padding: 20px;
+        }
+
+        .filters {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .filter-group {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .filter-group label {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .filter-group select {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .chart-container {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        }
+
+        .chart-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .events-section {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            margin-bottom: 30px;
+        }
+
+        .events-section h2 {
+            font-size: 24px;
+            color: #333;
+            margin-bottom: 20px;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 15px;
+        }
+
+        .event-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 20px;
+        }
+
+        .event-card {
+            border: 2px solid #f0f0f0;
+            border-radius: 10px;
+            padding: 20px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .event-card:hover {
+            border-color: #667eea;
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.15);
+            transform: translateY(-5px);
+        }
+
+        .event-date {
+            color: #667eea;
+            font-weight: 700;
+            font-size: 14px;
+            margin-bottom: 8px;
+            display: inline-block;
+            background: #f5f7ff;
+            padding: 4px 10px;
+            border-radius: 4px;
+        }
+
+        .event-location {
+            font-size: 20px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .event-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .stat {
+            text-align: center;
+            padding: 15px;
+            background: #f9f9f9;
+            border-radius: 8px;
+        }
+
+        .stat-number {
+            font-size: 24px;
+            font-weight: 700;
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #999;
+            text-transform: uppercase;
+        }
+
+        .table-section {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            overflow-x: auto;
+        }
+
+        .table-section h2 {
+            font-size: 24px;
+            color: #333;
+            margin-bottom: 20px;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 15px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+
+        table thead {
+            background: #667eea;
+            color: white;
+        }
+
+        table th {
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        table td {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        table tbody tr:hover {
+            background: #f9f9f9;
+        }
+
+        table tbody tr:last-child td {
+            border-bottom: 2px solid #667eea;
+            font-weight: 600;
+        }
+
+        .rate-cell {
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        .note {
+            background: #fff3cd;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid #ffc107;
+            font-size: 14px;
+            color: #856404;
+        }
+
+        footer {
+            text-align: center;
+            color: white;
+            padding: 20px;
+            margin-top: 30px;
+            font-size: 13px;
+        }
+
+        @media (max-width: 768px) {
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .kpi-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>生生護動 - 招生說明會成效分析</h1>
+            <p>追蹤每場說明會的關鍵指標與轉換成效（即時同步 Airtable）</p>
+            <div class="status">🔄 即時同步 Airtable Pipeline 數據</div>
+        </header>
+
+        <div class="note">
+            📌 <strong>數據說明：</strong> 報名人數按您提供的數據為準；MQL = SQL + 競品 + 合作夥伴 + 其他（來自 Airtable 實時統計）
+        </div>
+
+        <div class="kpi-grid">
+            <div class="kpi-card">
+                <div class="kpi-label">總報名人數</div>
+                <div class="kpi-value" id="totalRegistration">-</div>
+            </div>
+            <div class="kpi-card mql">
+                <div class="kpi-label">MQL 轉換率</div>
+                <div class="kpi-value" id="mqlRate">-</div>
+                <div class="kpi-rate" id="mqlDetails">-</div>
+            </div>
+            <div class="kpi-card sql">
+                <div class="kpi-label">SQL 轉換率</div>
+                <div class="kpi-value" id="sqlRate">-</div>
+                <div class="kpi-rate" id="sqlDetails">-</div>
+            </div>
+            <div class="kpi-card rate">
+                <div class="kpi-label">平均合格率</div>
+                <div class="kpi-value" id="qualificationRate">-</div>
+                <div class="kpi-rate" id="qualificationDetails">-</div>
+            </div>
+        </div>
+
+        <div class="filters">
+            <div class="filter-group">
+                <label>篩選園區：</label>
+                <select id="parkFilter" onchange="updateDashboard()">
+                    <option value="">全部園區</option>
+                    <option value="南軟">南軟</option>
+                    <option value="竹科">竹科</option>
+                    <option value="林口華亞">林口華亞</option>
+                    <option value="中科">中科</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="charts-grid">
+            <div class="chart-container">
+                <div class="chart-title">說明會報名趨勢</div>
+                <canvas id="registrationChart"></canvas>
+            </div>
+            <div class="chart-container">
+                <div class="chart-title">MQL/SQL 轉換對比</div>
+                <canvas id="conversionChart"></canvas>
+            </div>
+        </div>
+
+        <div class="charts-grid">
+            <div class="chart-container">
+                <div class="chart-title">各園區成效對比</div>
+                <canvas id="parkComparisonChart"></canvas>
+            </div>
+            <div class="chart-container">
+                <div class="chart-title">轉換率趨勢</div>
+                <canvas id="rateChart"></canvas>
+            </div>
+        </div>
+
+        <div class="events-section">
+            <h2>說明會詳情</h2>
+            <div class="event-cards" id="eventCards">
+                <div class="loading">載入中...</div>
+            </div>
+        </div>
+
+        <div class="table-section">
+            <h2>完整數據表（Airtable 即時數據）</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>場次</th>
+                        <th>舉辦日期</th>
+                        <th>園區</th>
+                        <th>報名人數</th>
+                        <th>SQL</th>
+                        <th>競品</th>
+                        <th>合作夥伴</th>
+                        <th>其他</th>
+                        <th>MQL<br/>(SQL+競品+合夥+其他)</th>
+                        <th>MQL轉換率</th>
+                        <th>SQL轉換率</th>
+                    </tr>
+                </thead>
+                <tbody id="dataTable"></tbody>
+            </table>
+        </div>
+
+        <footer>
+            <p>數據最後更新：<span id="lastUpdate">-</span> | Airtable 即時同步 | 生生護動 B2B 健康管理解決方案</p>
+        </footer>
+    </div>
+
+    <script src="config.js"></script>
+    <script>
+        // Airtable API 設定來自 config.js（配置文件中包含敏感信息，不會提交到版本控制）
+        const AIRTABLE_TOKEN = typeof AIRTABLE_CONFIG !== 'undefined' ? AIRTABLE_CONFIG.TOKEN : null;
+        const BASE_ID = typeof AIRTABLE_CONFIG !== 'undefined' ? AIRTABLE_CONFIG.BASE_ID : null;
+        const TABLE_ID = typeof AIRTABLE_CONFIG !== 'undefined' ? AIRTABLE_CONFIG.TABLE_ID : null;
+
+        if (!AIRTABLE_TOKEN || !BASE_ID || !TABLE_ID) {
+            console.error('配置錯誤：請確保 config.js 檔案存在且包含正確的 AIRTABLE_CONFIG 設定');
+        }
+
+        // 說明會基本信息（報名人數依 Mel 提供為準）
+        const events = [
+            { id: 1, date: "2025/10/30", location: "南軟", registration: 43, airtableSource: "南港場", status: "completed" },
+            { id: 2, date: "2025/11/4", location: "竹科", registration: 33, airtableSource: "新竹場", status: "completed" },
+            { id: 3, date: "2025/11/25", location: "林口華亞", registration: 22, airtableSource: "林口場", status: "completed" },
+            { id: 4, date: "2025/12/18", location: "中科", registration: 25, airtableSource: "中科場", status: "completed" },
+            { id: 5, date: "2026/3/25", location: "南軟", registration: 43, airtableSource: "3/25南軟場", status: "completed" },
+        ];
+
+        let charts = {};
+        const colors = {
+            primary: '#667eea',
+            mql: '#FF6B6B',
+            sql: '#4ECDC4',
+            success: '#45B7D1',
+            warning: '#FFE66D'
+        };
+
+        // 從 Airtable 拉取數據
+        async function fetchAirtableData() {
+            try {
+                const response = await fetch(
+                    `https://api.airtable.com/v0/${BASE_ID}/${TABLE_ID}`,
+                    {
+                        headers: { 'Authorization': `Bearer ${AIRTABLE_TOKEN}` }
+                    }
+                );
+
+                const data = await response.json();
+                const records = data.records || [];
+
+                // 統計各場次的分類數據
+                const sourceStats = {};
+                records.forEach(record => {
+                    const source = record.fields['名單來源'];
+                    const category = record.fields['名單分類'];
+
+                    if (!source || !category) return;
+
+                    const sourceName = Array.isArray(source) ? source[0] : source;
+                    const categoryName = Array.isArray(category) ? category[0] : category;
+
+                    if (!sourceStats[sourceName]) {
+                        sourceStats[sourceName] = { SQL: 0, 競品: 0, 合作夥伴: 0, 其他: 0 };
+                    }
+
+                    if (sourceStats[sourceName][categoryName] !== undefined) {
+                        sourceStats[sourceName][categoryName]++;
+                    }
+                });
+
+                // 將 Airtable 數據關聯到事件
+                events.forEach(event => {
+                    if (event.airtableSource && sourceStats[event.airtableSource]) {
+                        const stats = sourceStats[event.airtableSource];
+                        event.sql = stats.SQL || 0;
+                        event.competitor = stats.競品 || 0;
+                        event.partner = stats.合作夥伴 || 0;
+                        event.other = stats.其他 || 0;
+                        event.mql = event.sql + event.competitor + event.partner + event.other;
+                        event.unqualified = event.registration - (event.mql + event.sql); // 估算不合格人數
+                    } else {
+                        // 沒有 Airtable 數據的事件設為 0
+                        event.sql = 0;
+                        event.competitor = 0;
+                        event.partner = 0;
+                        event.other = 0;
+                        event.mql = 0;
+                        event.unqualified = event.registration;
+                    }
+                });
+
+                document.getElementById('lastUpdate').textContent = new Date().toLocaleString('zh-TW');
+                updateDashboard();
+
+            } catch (error) {
+                console.error('Airtable API 錯誤:', error);
+                document.getElementById('eventCards').innerHTML = '<div class="loading">無法載入 Airtable 數據</div>';
+            }
+        }
+
+        function getFilteredEvents() {
+            const park = document.getElementById('parkFilter').value;
+            return park ? events.filter(e => e.location === park && e.status === 'completed') : events.filter(e => e.status === 'completed');
+        }
+
+        function calculateMetrics(filteredEvents) {
+            const totalReg = filteredEvents.reduce((sum, e) => sum + e.registration, 0);
+            const totalMql = filteredEvents.reduce((sum, e) => sum + e.mql, 0);
+            const totalSql = filteredEvents.reduce((sum, e) => sum + e.sql, 0);
+            const totalUnqualified = filteredEvents.reduce((sum, e) => sum + e.unqualified, 0);
+
+            return {
+                totalReg,
+                mqlRate: totalReg > 0 ? (totalMql / totalReg * 100).toFixed(1) : 0,
+                sqlRate: totalReg > 0 ? (totalSql / totalReg * 100).toFixed(1) : 0,
+                qualificationRate: totalReg > 0 ? ((totalReg - totalUnqualified) / totalReg * 100).toFixed(1) : 0,
+                totalMql,
+                totalSql,
+                totalUnqualified
+            };
+        }
+
+        function updateKPIs() {
+            const filtered = getFilteredEvents();
+            const metrics = calculateMetrics(filtered);
+
+            document.getElementById('totalRegistration').textContent = metrics.totalReg;
+            document.getElementById('mqlRate').textContent = metrics.mqlRate + '%';
+            document.getElementById('mqlDetails').textContent = `${metrics.totalMql}位導線`;
+            document.getElementById('sqlRate').textContent = metrics.sqlRate + '%';
+            document.getElementById('sqlDetails').textContent = `${metrics.totalSql}位銷售機會`;
+            document.getElementById('qualificationRate').textContent = metrics.qualificationRate + '%';
+            document.getElementById('qualificationDetails').textContent = `${metrics.totalReg - metrics.totalUnqualified}位合格`;
+        }
+
+        function renderEventCards() {
+            const completedEvents = events.filter(e => e.status === 'completed');
+            const html = completedEvents.map(event => `
+                <div class="event-card">
+                    <div class="event-date">${event.date}</div>
+                    <div class="event-location">${event.location}</div>
+                    <div class="event-stats">
+                        <div class="stat">
+                            <div class="stat-number">${event.registration}</div>
+                            <div class="stat-label">報名</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-number" style="color: #FF6B6B;">${event.mql}</div>
+                            <div class="stat-label">MQL</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-number" style="color: #4ECDC4;">${event.sql}</div>
+                            <div class="stat-label">SQL</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-number" style="color: #FFE66D;">${event.registration > 0 ? ((event.registration - event.unqualified) / event.registration * 100).toFixed(0) : 0}%</div>
+                            <div class="stat-label">合格率</div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+
+            document.getElementById('eventCards').innerHTML = html;
+        }
+
+        function renderDataTable() {
+            const completedEvents = events.filter(e => e.status === 'completed');
+            const metrics = calculateMetrics(completedEvents);
+
+            let html = completedEvents.map(event => `
+                <tr>
+                    <td>${event.id}</td>
+                    <td>${event.date}</td>
+                    <td>${event.location}</td>
+                    <td>${event.registration}</td>
+                    <td>${event.sql}</td>
+                    <td>${event.competitor}</td>
+                    <td>${event.partner}</td>
+                    <td>${event.other}</td>
+                    <td>${event.mql}</td>
+                    <td class="rate-cell">${event.registration > 0 ? (event.mql / event.registration * 100).toFixed(1) : 0}%</td>
+                    <td class="rate-cell">${event.registration > 0 ? (event.sql / event.registration * 100).toFixed(1) : 0}%</td>
+                </tr>
+            `).join('');
+
+            html += `
+                <tr>
+                    <td colspan="3" style="font-weight: bold;">總計</td>
+                    <td>${metrics.totalReg}</td>
+                    <td>${metrics.totalSql}</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>${metrics.totalMql}</td>
+                    <td class="rate-cell">${metrics.mqlRate}%</td>
+                    <td class="rate-cell">${metrics.sqlRate}%</td>
+                </tr>
+            `;
+
+            document.getElementById('dataTable').innerHTML = html;
+        }
+
+        function updateCharts() {
+            const filtered = getFilteredEvents();
+
+            // 報名趨勢
+            if (charts.registration) charts.registration.destroy();
+            charts.registration = new Chart(document.getElementById('registrationChart'), {
+                type: 'line',
+                data: {
+                    labels: filtered.map(e => e.date),
+                    datasets: [{
+                        label: '報名人數',
+                        data: filtered.map(e => e.registration),
+                        borderColor: colors.primary,
+                        backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4,
+                        pointRadius: 6,
+                        pointBackgroundColor: colors.primary,
+                        pointBorderColor: '#fff',
+                        pointBorderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: { legend: { display: false } },
+                    scales: { y: { beginAtZero: true } }
+                }
+            });
+
+            // MQL/SQL 轉換
+            if (charts.conversion) charts.conversion.destroy();
+            charts.conversion = new Chart(document.getElementById('conversionChart'), {
+                type: 'bar',
+                data: {
+                    labels: filtered.map(e => e.date),
+                    datasets: [
+                        {
+                            label: 'MQL',
+                            data: filtered.map(e => e.mql),
+                            backgroundColor: colors.mql
+                        },
+                        {
+                            label: 'SQL',
+                            data: filtered.map(e => e.sql),
+                            backgroundColor: colors.sql
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    scales: { y: { beginAtZero: true } }
+                }
+            });
+
+            // 園區對比
+            const parkData = {};
+            filtered.forEach(e => {
+                if (!parkData[e.location]) {
+                    parkData[e.location] = { registration: 0, mql: 0, sql: 0 };
+                }
+                parkData[e.location].registration += e.registration;
+                parkData[e.location].mql += e.mql;
+                parkData[e.location].sql += e.sql;
+            });
+
+            if (charts.park) charts.park.destroy();
+            charts.park = new Chart(document.getElementById('parkComparisonChart'), {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(parkData),
+                    datasets: [{
+                        data: Object.values(parkData).map(d => d.registration),
+                        backgroundColor: ['#667eea', '#FF6B6B', '#4ECDC4', '#FFE66D', '#95E1D3']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: { legend: { position: 'bottom' } }
+                }
+            });
+
+            // 轉換率趨勢
+            if (charts.rate) charts.rate.destroy();
+            charts.rate = new Chart(document.getElementById('rateChart'), {
+                type: 'line',
+                data: {
+                    labels: filtered.map(e => e.date),
+                    datasets: [
+                        {
+                            label: 'MQL轉換率',
+                            data: filtered.map(e => e.registration > 0 ? (e.mql / e.registration * 100).toFixed(1) : 0),
+                            borderColor: colors.mql,
+                            backgroundColor: 'rgba(255, 107, 107, 0.1)',
+                            borderWidth: 2,
+                            tension: 0.4,
+                            pointRadius: 5
+                        },
+                        {
+                            label: 'SQL轉換率',
+                            data: filtered.map(e => e.registration > 0 ? (e.sql / e.registration * 100).toFixed(1) : 0),
+                            borderColor: colors.sql,
+                            backgroundColor: 'rgba(78, 205, 196, 0.1)',
+                            borderWidth: 2,
+                            tension: 0.4,
+                            pointRadius: 5
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    scales: { y: { beginAtZero: true } }
+                }
+            });
+        }
+
+        function updateDashboard() {
+            updateKPIs();
+            updateCharts();
+            renderDataTable();
+        }
+
+        // 初始化
+        renderEventCards();
+        fetchAirtableData();
+    </script>
+</body>
+</html>

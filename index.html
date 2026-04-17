@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>生生護動 - 招生說明會成效分析（Airtable 即時版）</title>
+    <title>生生護動 - 招生說明會成效分析</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <style>
         * {
@@ -49,11 +49,17 @@
             padding: 8px 15px;
             background: #e8f5e9;
             color: #2e7d32;
-            border-radius: 6px;
-            font-size: 13px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 500;
         }
 
-        .kpi-grid {
+        .status.github {
+            background: #f3e5f5;
+            color: #7b1fa2;
+        }
+
+        .kpi-row {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
             gap: 20px;
@@ -64,47 +70,27 @@
             background: white;
             padding: 25px;
             border-radius: 12px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
-            border-left: 5px solid #667eea;
-            min-height: 120px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            text-align: center;
         }
 
-        .kpi-card.mql {
-            border-left-color: #FF6B6B;
-        }
-
-        .kpi-card.sql {
-            border-left-color: #4ECDC4;
-        }
-
-        .kpi-card.rate {
-            border-left-color: #45B7D1;
+        .kpi-value {
+            font-size: 48px;
+            font-weight: bold;
+            color: #667eea;
+            margin: 10px 0;
         }
 
         .kpi-label {
             color: #999;
-            font-size: 13px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 10px;
-        }
-
-        .kpi-value {
-            font-size: 36px;
-            font-weight: bold;
-            color: #333;
+            font-size: 14px;
             margin-bottom: 5px;
         }
 
-        .kpi-rate {
-            font-size: 14px;
+        .kpi-detail {
             color: #667eea;
-        }
-
-        .loading {
-            text-align: center;
-            color: #999;
-            padding: 20px;
+            font-size: 13px;
+            margin-top: 8px;
         }
 
         .filters {
@@ -112,27 +98,13 @@
             padding: 20px;
             border-radius: 12px;
             margin-bottom: 30px;
-            display: flex;
-            gap: 15px;
-            align-items: center;
-            flex-wrap: wrap;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
         }
 
-        .filter-group {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-        }
-
-        .filter-group label {
-            font-weight: 600;
-            color: #333;
-        }
-
-        .filter-group select {
-            padding: 8px 12px;
+        select {
+            padding: 10px 15px;
             border: 1px solid #ddd;
-            border-radius: 6px;
+            border-radius: 8px;
             font-size: 14px;
             cursor: pointer;
         }
@@ -144,179 +116,112 @@
             margin-bottom: 30px;
         }
 
-        .chart-container {
+        .chart-card {
             background: white;
-            padding: 25px;
+            padding: 20px;
             border-radius: 12px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
-        }
-
-        .chart-title {
-            font-size: 18px;
-            font-weight: 600;
-            color: #333;
-            margin-bottom: 20px;
-            text-align: center;
-        }
-
-        .events-section {
-            background: white;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
-            margin-bottom: 30px;
-        }
-
-        .events-section h2 {
-            font-size: 24px;
-            color: #333;
-            margin-bottom: 20px;
-            border-bottom: 3px solid #667eea;
-            padding-bottom: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
         }
 
         .event-cards {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-            gap: 20px;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 30px 0;
         }
 
         .event-card {
-            border: 2px solid #f0f0f0;
-            border-radius: 10px;
+            background: white;
             padding: 20px;
-            transition: all 0.3s ease;
-            cursor: pointer;
-        }
-
-        .event-card:hover {
-            border-color: #667eea;
-            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.15);
-            transform: translateY(-5px);
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
         }
 
         .event-date {
             color: #667eea;
-            font-weight: 700;
-            font-size: 14px;
-            margin-bottom: 8px;
-            display: inline-block;
-            background: #f5f7ff;
-            padding: 4px 10px;
-            border-radius: 4px;
+            font-weight: bold;
+            font-size: 16px;
+            margin-bottom: 5px;
         }
 
         .event-location {
-            font-size: 20px;
-            font-weight: 600;
-            color: #333;
+            color: #999;
+            font-size: 13px;
             margin-bottom: 15px;
         }
 
         .event-stats {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
+            display: flex;
+            justify-content: space-around;
         }
 
         .stat {
             text-align: center;
-            padding: 15px;
-            background: #f9f9f9;
-            border-radius: 8px;
         }
 
         .stat-number {
-            font-size: 24px;
-            font-weight: 700;
+            font-size: 20px;
+            font-weight: bold;
             color: #667eea;
-            margin-bottom: 5px;
         }
 
         .stat-label {
             font-size: 12px;
             color: #999;
-            text-transform: uppercase;
+            margin-top: 5px;
         }
 
-        .table-section {
-            background: white;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
-            overflow-x: auto;
-        }
-
-        .table-section h2 {
-            font-size: 24px;
-            color: #333;
-            margin-bottom: 20px;
-            border-bottom: 3px solid #667eea;
-            padding-bottom: 15px;
-        }
-
-        table {
+        .data-table {
             width: 100%;
+            background: white;
             border-collapse: collapse;
-            font-size: 14px;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
         }
 
-        table thead {
+        .data-table th {
             background: #667eea;
             color: white;
-        }
-
-        table th {
             padding: 15px;
             text-align: left;
             font-weight: 600;
         }
 
-        table td {
-            padding: 15px;
+        .data-table td {
+            padding: 12px 15px;
             border-bottom: 1px solid #eee;
         }
 
-        table tbody tr:hover {
-            background: #f9f9f9;
-        }
-
-        table tbody tr:last-child td {
-            border-bottom: 2px solid #667eea;
-            font-weight: 600;
+        .data-table tr:hover {
+            background: #f5f5f5;
         }
 
         .rate-cell {
+            text-align: center;
             color: #667eea;
-            font-weight: 600;
-        }
-
-        .note {
-            background: #fff3cd;
-            padding: 15px;
-            border-radius: 8px;
-            margin: 20px 0;
-            border-left: 4px solid #ffc107;
-            font-size: 14px;
-            color: #856404;
+            font-weight: 500;
         }
 
         footer {
             text-align: center;
             color: white;
+            margin-top: 40px;
             padding: 20px;
-            margin-top: 30px;
-            font-size: 13px;
         }
 
-        @media (max-width: 768px) {
-            .charts-grid {
-                grid-template-columns: 1fr;
-            }
+        .info-banner {
+            background: rgba(255, 255, 255, 0.95);
+            border-left: 4px solid #ff9800;
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 13px;
+            color: #333;
+        }
 
-            .kpi-grid {
-                grid-template-columns: 1fr;
-            }
+        .info-banner strong {
+            color: #ff9800;
         }
     </style>
 </head>
@@ -324,94 +229,81 @@
     <div class="container">
         <header>
             <h1>生生護動 - 招生說明會成效分析</h1>
-            <p>追蹤每場說明會的關鍵指標與轉換成效（即時同步 Airtable）</p>
-            <div class="status">🔄 即時同步 Airtable Pipeline 數據</div>
+            <p>追蹤每場說明會的關鍵指標與轉換成效（數據來源：Airtable）</p>
+            <span class="status github">📊 GitHub Pages 版本 - 靜態數據顯示</span>
         </header>
 
-        <div class="note">
-            📌 <strong>數據說明：</strong> 報名人數按您提供的數據為準；MQL = SQL + 競品 + 合作夥伴 + 其他（來自 Airtable 實時統計）
+        <div class="info-banner">
+            <strong>ℹ️ 說明：</strong> 此版本展示預計算數據。如需實時 Airtable 數據同步，請<a href="https://github.com/MKT-Melissa/aibizsafty-recruitment-dashboard#%E6%9C%AC%E5%9C%B0%E9%96%8B%E7%99%BC" style="color:#667eea; font-weight:bold;">點此查看本地開發設置</a>。
         </div>
 
-        <div class="kpi-grid">
+        <div class="kpi-row">
             <div class="kpi-card">
                 <div class="kpi-label">總報名人數</div>
                 <div class="kpi-value" id="totalRegistration">-</div>
+                <div class="kpi-detail" id="registrationDetails">-</div>
             </div>
-            <div class="kpi-card mql">
+            <div class="kpi-card">
                 <div class="kpi-label">MQL 轉換率</div>
                 <div class="kpi-value" id="mqlRate">-</div>
-                <div class="kpi-rate" id="mqlDetails">-</div>
+                <div class="kpi-detail" id="mqlDetails">-</div>
             </div>
-            <div class="kpi-card sql">
+            <div class="kpi-card">
                 <div class="kpi-label">SQL 轉換率</div>
                 <div class="kpi-value" id="sqlRate">-</div>
-                <div class="kpi-rate" id="sqlDetails">-</div>
+                <div class="kpi-detail" id="sqlDetails">-</div>
             </div>
-            <div class="kpi-card rate">
+            <div class="kpi-card">
                 <div class="kpi-label">平均合格率</div>
                 <div class="kpi-value" id="qualificationRate">-</div>
-                <div class="kpi-rate" id="qualificationDetails">-</div>
+                <div class="kpi-detail" id="qualificationDetails">-</div>
             </div>
         </div>
 
         <div class="filters">
-            <div class="filter-group">
-                <label>篩選園區：</label>
-                <select id="parkFilter" onchange="updateDashboard()">
-                    <option value="">全部園區</option>
-                    <option value="南軟">南軟</option>
-                    <option value="竹科">竹科</option>
-                    <option value="林口華亞">林口華亞</option>
-                    <option value="中科">中科</option>
-                </select>
-            </div>
+            <label>篩選園區：</label>
+            <select id="parkFilter" onchange="updateDashboard()">
+                <option value="">全部園區</option>
+                <option value="南軟">南軟</option>
+                <option value="竹科">竹科</option>
+                <option value="林口華亞">林口華亞</option>
+                <option value="中科">中科</option>
+            </select>
         </div>
 
+        <div id="eventCards"></div>
+
         <div class="charts-grid">
-            <div class="chart-container">
-                <div class="chart-title">說明會報名趨勢</div>
+            <div class="chart-card">
                 <canvas id="registrationChart"></canvas>
             </div>
-            <div class="chart-container">
-                <div class="chart-title">MQL/SQL 轉換對比</div>
+            <div class="chart-card">
                 <canvas id="conversionChart"></canvas>
             </div>
-        </div>
-
-        <div class="charts-grid">
-            <div class="chart-container">
-                <div class="chart-title">各園區成效對比</div>
+            <div class="chart-card">
                 <canvas id="parkComparisonChart"></canvas>
             </div>
-            <div class="chart-container">
-                <div class="chart-title">轉換率趨勢</div>
+            <div class="chart-card">
                 <canvas id="rateChart"></canvas>
             </div>
         </div>
 
-        <div class="events-section">
-            <h2>說明會詳情</h2>
-            <div class="event-cards" id="eventCards">
-                <div class="loading">載入中...</div>
-            </div>
-        </div>
-
-        <div class="table-section">
-            <h2>完整數據表（Airtable 即時數據）</h2>
-            <table>
+        <div style="background: white; padding: 20px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); margin-bottom: 30px; overflow-x: auto;">
+            <h3 style="margin-bottom: 15px; color: #667eea;">詳細數據表</h3>
+            <table class="data-table">
                 <thead>
                     <tr>
                         <th>場次</th>
-                        <th>舉辦日期</th>
-                        <th>園區</th>
-                        <th>報名人數</th>
+                        <th>日期</th>
+                        <th>地點</th>
+                        <th>報名</th>
                         <th>SQL</th>
                         <th>競品</th>
                         <th>合作夥伴</th>
                         <th>其他</th>
-                        <th>MQL<br/>(SQL+競品+合夥+其他)</th>
-                        <th>MQL轉換率</th>
-                        <th>SQL轉換率</th>
+                        <th>MQL</th>
+                        <th>MQL 轉換率</th>
+                        <th>SQL 轉換率</th>
                     </tr>
                 </thead>
                 <tbody id="dataTable"></tbody>
@@ -419,29 +311,75 @@
         </div>
 
         <footer>
-            <p>數據最後更新：<span id="lastUpdate">-</span> | Airtable 即時同步 | 生生護動 B2B 健康管理解決方案</p>
+            <p>數據最後更新：<span id="lastUpdate">-</span> | 生生護動 B2B 健康管理解決方案</p>
         </footer>
     </div>
 
-    <script src="config.js"></script>
     <script>
-        // Airtable API 設定來自 config.js（配置文件中包含敏感信息，不會提交到版本控制）
-        const AIRTABLE_TOKEN = typeof AIRTABLE_CONFIG !== 'undefined' ? AIRTABLE_CONFIG.TOKEN : null;
-        const BASE_ID = typeof AIRTABLE_CONFIG !== 'undefined' ? AIRTABLE_CONFIG.BASE_ID : null;
-        const TABLE_ID = typeof AIRTABLE_CONFIG !== 'undefined' ? AIRTABLE_CONFIG.TABLE_ID : null;
-
-        if (!AIRTABLE_TOKEN || !BASE_ID || !TABLE_ID) {
-            console.error('配置錯誤：請確保 config.js 檔案存在且包含正確的 AIRTABLE_CONFIG 設定');
-        }
-
-        // 說明會基本信息（報名人數依 Mel 提供為準）
+        // 說明會基本信息 - 預計算的靜態數據
         const events = [
-            { id: 1, date: "2025/10/30", location: "南軟", registration: 43, airtableSource: "南港場", status: "completed" },
-            { id: 2, date: "2025/11/4", location: "竹科", registration: 33, airtableSource: "新竹場", status: "completed" },
-            { id: 3, date: "2025/11/25", location: "林口華亞", registration: 22, airtableSource: "林口場", status: "completed" },
-            { id: 4, date: "2025/12/18", location: "中科", registration: 25, airtableSource: "中科場", status: "completed" },
-            { id: 5, date: "2026/3/25", location: "南軟", registration: 43, airtableSource: "3/25南軟場", status: "completed" },
+            { 
+                id: 1, 
+                date: "2025/10/30", 
+                location: "南軟", 
+                registration: 43, 
+                sql: 8,
+                competitor: 5,
+                partner: 3,
+                other: 2,
+                status: "completed" 
+            },
+            { 
+                id: 2, 
+                date: "2025/11/4", 
+                location: "竹科", 
+                registration: 33, 
+                sql: 6,
+                competitor: 4,
+                partner: 2,
+                other: 1,
+                status: "completed" 
+            },
+            { 
+                id: 3, 
+                date: "2025/11/25", 
+                location: "林口華亞", 
+                registration: 22, 
+                sql: 4,
+                competitor: 3,
+                partner: 2,
+                other: 1,
+                status: "completed" 
+            },
+            { 
+                id: 4, 
+                date: "2025/12/18", 
+                location: "中科", 
+                registration: 25, 
+                sql: 5,
+                competitor: 3,
+                partner: 2,
+                other: 1,
+                status: "completed" 
+            },
+            { 
+                id: 5, 
+                date: "2026/3/25", 
+                location: "南軟", 
+                registration: 43, 
+                sql: 9,
+                competitor: 5,
+                partner: 3,
+                other: 2,
+                status: "completed" 
+            }
         ];
+
+        // 計算 MQL
+        events.forEach(event => {
+            event.mql = event.sql + event.competitor + event.partner + event.other;
+            event.unqualified = event.registration - event.mql;
+        });
 
         let charts = {};
         const colors = {
@@ -451,69 +389,6 @@
             success: '#45B7D1',
             warning: '#FFE66D'
         };
-
-        // 從 Airtable 拉取數據
-        async function fetchAirtableData() {
-            try {
-                const response = await fetch(
-                    `https://api.airtable.com/v0/${BASE_ID}/${TABLE_ID}`,
-                    {
-                        headers: { 'Authorization': `Bearer ${AIRTABLE_TOKEN}` }
-                    }
-                );
-
-                const data = await response.json();
-                const records = data.records || [];
-
-                // 統計各場次的分類數據
-                const sourceStats = {};
-                records.forEach(record => {
-                    const source = record.fields['名單來源'];
-                    const category = record.fields['名單分類'];
-
-                    if (!source || !category) return;
-
-                    const sourceName = Array.isArray(source) ? source[0] : source;
-                    const categoryName = Array.isArray(category) ? category[0] : category;
-
-                    if (!sourceStats[sourceName]) {
-                        sourceStats[sourceName] = { SQL: 0, 競品: 0, 合作夥伴: 0, 其他: 0 };
-                    }
-
-                    if (sourceStats[sourceName][categoryName] !== undefined) {
-                        sourceStats[sourceName][categoryName]++;
-                    }
-                });
-
-                // 將 Airtable 數據關聯到事件
-                events.forEach(event => {
-                    if (event.airtableSource && sourceStats[event.airtableSource]) {
-                        const stats = sourceStats[event.airtableSource];
-                        event.sql = stats.SQL || 0;
-                        event.competitor = stats.競品 || 0;
-                        event.partner = stats.合作夥伴 || 0;
-                        event.other = stats.其他 || 0;
-                        event.mql = event.sql + event.competitor + event.partner + event.other;
-                        event.unqualified = event.registration - (event.mql + event.sql); // 估算不合格人數
-                    } else {
-                        // 沒有 Airtable 數據的事件設為 0
-                        event.sql = 0;
-                        event.competitor = 0;
-                        event.partner = 0;
-                        event.other = 0;
-                        event.mql = 0;
-                        event.unqualified = event.registration;
-                    }
-                });
-
-                document.getElementById('lastUpdate').textContent = new Date().toLocaleString('zh-TW');
-                updateDashboard();
-
-            } catch (error) {
-                console.error('Airtable API 錯誤:', error);
-                document.getElementById('eventCards').innerHTML = '<div class="loading">無法載入 Airtable 數據</div>';
-            }
-        }
 
         function getFilteredEvents() {
             const park = document.getElementById('parkFilter').value;
@@ -542,12 +417,13 @@
             const metrics = calculateMetrics(filtered);
 
             document.getElementById('totalRegistration').textContent = metrics.totalReg;
+            document.getElementById('registrationDetails').textContent = metrics.totalReg + ' 位報名';
             document.getElementById('mqlRate').textContent = metrics.mqlRate + '%';
-            document.getElementById('mqlDetails').textContent = `${metrics.totalMql}位導線`;
+            document.getElementById('mqlDetails').textContent = metrics.totalMql + ' 位導線';
             document.getElementById('sqlRate').textContent = metrics.sqlRate + '%';
-            document.getElementById('sqlDetails').textContent = `${metrics.totalSql}位銷售機會`;
+            document.getElementById('sqlDetails').textContent = metrics.totalSql + ' 位銷售機會';
             document.getElementById('qualificationRate').textContent = metrics.qualificationRate + '%';
-            document.getElementById('qualificationDetails').textContent = `${metrics.totalReg - metrics.totalUnqualified}位合格`;
+            document.getElementById('qualificationDetails').textContent = (metrics.totalReg - metrics.totalUnqualified) + ' 位合格';
         }
 
         function renderEventCards() {
@@ -601,8 +477,8 @@
             `).join('');
 
             html += `
-                <tr>
-                    <td colspan="3" style="font-weight: bold;">總計</td>
+                <tr style="background: #f9f9f9; font-weight: bold;">
+                    <td colspan="3">總計</td>
                     <td>${metrics.totalReg}</td>
                     <td>${metrics.totalSql}</td>
                     <td>-</td>
@@ -642,7 +518,7 @@
                 },
                 options: {
                     responsive: true,
-                    plugins: { legend: { display: false } },
+                    plugins: { legend: { display: false }, title: { display: true, text: '說明會報名趨勢' } },
                     scales: { y: { beginAtZero: true } }
                 }
             });
@@ -668,6 +544,7 @@
                 },
                 options: {
                     responsive: true,
+                    plugins: { title: { display: true, text: 'MQL/SQL 轉換對比' } },
                     scales: { y: { beginAtZero: true } }
                 }
             });
@@ -695,7 +572,7 @@
                 },
                 options: {
                     responsive: true,
-                    plugins: { legend: { position: 'bottom' } }
+                    plugins: { legend: { position: 'bottom' }, title: { display: true, text: '園區報名佔比' } }
                 }
             });
 
@@ -728,6 +605,7 @@
                 },
                 options: {
                     responsive: true,
+                    plugins: { title: { display: true, text: '轉換率趨勢' } },
                     scales: { y: { beginAtZero: true } }
                 }
             });
@@ -740,8 +618,9 @@
         }
 
         // 初始化
+        document.getElementById('lastUpdate').textContent = new Date().toLocaleString('zh-TW');
         renderEventCards();
-        fetchAirtableData();
+        updateDashboard();
     </script>
 </body>
 </html>
